@@ -1,6 +1,6 @@
 import { HtmlParser, I18NHtmlParser, Parser, Lexer, CompilerConfig, TemplateParser, DomElementSchemaRegistry, Visitor, Node, Attribute, Element, Expansion, Text, Comment, ExpansionCase } from '@angular/compiler'
 
-export function format(src: string, indentation: number = 4): string {
+export function format(src: string, indentation: number = 4, useSpaces: boolean = true): string {
     const rawHtmlParser = new HtmlParser();
     const htmlParser = new I18NHtmlParser(rawHtmlParser);
     const expressionParser = new Parser(new Lexer());
@@ -38,7 +38,11 @@ export function format(src: string, indentation: number = 4): string {
     };
 
     let getIndent = (i: number): string => {
-        return new Array(i * indentation).fill(' ').join('');
+        if (useSpaces) {
+            return new Array(i * indentation).fill(' ').join('');
+        } else {
+            return new Array(i).fill('\t').join('');
+        }
     }
 
     let visitor: Visitor = {

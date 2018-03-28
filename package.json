@@ -34,6 +34,11 @@
                     "type": "number",
                     "default": 4,
                     "description": "Number of spaces to indent"
+                },
+                "angular-template-formatter.useSpaces": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Use spaces or tabs for indentation (False will ignore indentWidth)"
                 }
             }
         }
