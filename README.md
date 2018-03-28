@@ -60,6 +60,10 @@ will get formatted to:
 
 ## Release Notes
 
+### 0.0.7
+
+Added an option for tabs vs spaces. Thanks @Empereol!
+
 ### 0.0.2
 
 Added configuration option for indentWidth, defaults to 4.
