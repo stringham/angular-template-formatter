@@ -60,6 +60,10 @@ will get formatted to:
 
 ## Release Notes
 
+### 0.0.8
+
+Added option for preventing closing tag `>` from being on their own line: `angular-template-formatter.closeTagSameLine`. Thanks @larscom!
+
 ### 0.0.7
 
 Added an option for tabs vs spaces. Thanks @Empereol!
