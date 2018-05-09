@@ -68,9 +68,6 @@ export function format(src: string, indentation: number = 4, useSpaces: boolean 
             element.attrs.forEach(attr => {
                 attr.visit(visitor, {});
             });
-            if (attrNewLines) {
-                pretty.push('\n' + getIndent(indent));
-            }
             pretty.push('>');
             indent++;
             let ctx = {
