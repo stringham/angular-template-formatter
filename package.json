@@ -42,7 +42,7 @@
                 },
                 "angular-template-formatter.closeTagNewLine": {
                     "type": "boolean",
-                    "default": false,
+                    "default": true,
                     "description": "Always place the closing element tag '>' on a new line."
                 }
             }
