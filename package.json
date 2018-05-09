@@ -40,7 +40,7 @@
                     "default": true,
                     "description": "Use spaces or tabs for indentation (False will ignore indentWidth)"
                 },
-                "angular-template-formatter.closeTagNewLine": {
+                "angular-template-formatter.closeTagSameLine": {
                     "type": "boolean",
                     "default": false,
                     "description": "Never place the closing tag '>' on a new line."
