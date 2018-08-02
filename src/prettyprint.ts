@@ -13,6 +13,10 @@ export function format(src: string, indentation: number = 4, useSpaces: boolean 
     let indent = 0;
     let attrNewLines = false;
 
+    if(htmlResult.errors && htmlResult.errors.length > 0) {
+        return src;
+    }
+
     const selfClosing = {
         'area': true,
         'base': true,
