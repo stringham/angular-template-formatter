@@ -1,5 +1,9 @@
 import { HtmlParser, I18NHtmlParser, Parser, Lexer, CompilerConfig, TemplateParser, DomElementSchemaRegistry, Visitor, Node, Attribute, Element, Expansion, Text, Comment, ExpansionCase } from '@angular/compiler'
 
+function formatElementName(name: string) {
+    return name.replace(/^:svg:/, '');
+}
+
 export function format(src: string, indentation: number = 4, useSpaces: boolean = true, closeTagSameLine: boolean = false): string {
     const rawHtmlParser = new HtmlParser();
     const htmlParser = new I18NHtmlParser(rawHtmlParser);
@@ -54,20 +58,7 @@ export function format(src: string, indentation: number = 4, useSpaces: boolean 
             if (pretty.length > 0) {
                 pretty.push('\n');
             }
-            if (element.name.startsWith(':svg:')) {
-                pretty.push(getIndent(indent) + element.sourceSpan.toString());
-                indent++;
-                element.children.forEach(e => e.visit(visitor, {}));
-                indent--;
-                if (element.children.length > 0) {
-                    pretty.push('\n' + getIndent(indent));
-                } else if (element.sourceSpan.toString().endsWith("/>")) {
-                    return;
-                }
-                pretty.push(element.endSourceSpan!.toString());
-                return;
-            }
-            pretty.push(getIndent(indent) + '<' + element.name);
+            pretty.push(getIndent(indent) + '<' + formatElementName(element.name));
             attrNewLines = element.attrs.length > 1 && element.name != 'link';
             element.attrs.forEach(attr => {
                 attr.visit(visitor, {});
@@ -93,7 +84,7 @@ export function format(src: string, indentation: number = 4, useSpaces: boolean 
                 pretty.push('\n' + getIndent(indent));
             }
             if (!selfClosing.hasOwnProperty(element.name)) {
-                pretty.push(`</${element.name}>`);
+                pretty.push(`</${formatElementName(element.name)}>`);
             }
         },
         visit: function (node: Node, context: any) {
@@ -128,7 +119,7 @@ export function format(src: string, indentation: number = 4, useSpaces: boolean 
                 let prefix = shouldInline ? '' : '\n' + getIndent(indent);
                 pretty.push(prefix + text.value.trim());
             } else if (!shouldInline) {
-                pretty.push(text.value.replace('\n', '').replace(/ /g, '').replace(/\t/g, '').replace(/\n+/,'\n'));
+                pretty.push(text.value.replace('\n', '').replace(/ /g, '').replace(/\t/g, '').replace(/\n+/, '\n'));
             }
         }
     }
