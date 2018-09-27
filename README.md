@@ -60,6 +60,10 @@ will get formatted to:
 
 ## Release Notes
 
+### 0.1.1
+
+Does not remove <!DOCTYPE> tags when formatting.
+
 ### 0.1.0
 
 Now formats svgs in templates
