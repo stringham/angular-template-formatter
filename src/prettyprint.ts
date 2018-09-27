@@ -131,6 +131,10 @@ export function format(src: string, indentation: number = 4, useSpaces: boolean 
     }
 
     htmlResult.rootNodes.forEach(node => {
+        const doctype = node.sourceSpan.start.getContext(20, 1).before;
+        if (doctype.includes('<!')) {
+            pretty.push(doctype);
+        }
         node.visit(visitor, {});
     })
 
