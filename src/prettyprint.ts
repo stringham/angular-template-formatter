@@ -45,6 +45,12 @@ export function format(src: string, indentation: number = 4, useSpaces: boolean 
         'pre': true,
     };
 
+    const detectedDoctype = src.match(/^\s*<!DOCTYPE((.|\n|\r)*?)>/i);
+
+    if (detectedDoctype) {
+        pretty.push(detectedDoctype[0].trim());
+    }
+
     let getIndent = (i: number): string => {
         if (useSpaces) {
             return new Array(i * indentation).fill(' ').join('');
