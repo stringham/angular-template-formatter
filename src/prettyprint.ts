@@ -1,4 +1,4 @@
-import { HtmlParser, I18NHtmlParser, Parser, Lexer, CompilerConfig, TemplateParser, DomElementSchemaRegistry, Visitor, Node, Attribute, Element, Expansion, Text, Comment, ExpansionCase } from '@angular/compiler'
+import { HtmlParser, I18NHtmlParser, Parser, Lexer, CompilerConfig, TemplateParser, DomElementSchemaRegistry, Visitor, Node, Attribute, Element, Expansion, Text, Comment, ExpansionCase, ParseSourceSpan } from '@angular/compiler'
 
 function formatElementName(name: string) {
     return name.replace(/^:svg:/, '');
@@ -59,6 +59,10 @@ export function format(src: string, indentation: number = 4, useSpaces: boolean 
         }
     }
 
+    function getFromSource(parseLocation:ParseSourceSpan) {
+        return parseLocation.start.file.content.substring(parseLocation.start.offset, parseLocation.end.offset);
+    }
+
     let visitor: Visitor = {
         visitElement: function (element) {
             if (pretty.length > 0) {
@@ -100,7 +104,8 @@ export function format(src: string, indentation: number = 4, useSpaces: boolean 
             let prefix = attrNewLines ? '\n' + getIndent(indent + 1) : ' ';
             pretty.push(prefix + attribute.name);
             if (attribute.value.length) {
-                pretty.push(`="${attribute.value.trim()}"`);
+                const value = getFromSource(attribute.valueSpan);
+                pretty.push(`=${value.trim()}`);
             }
         },
         visitComment: function (comment: Comment, context: any) {
@@ -113,19 +118,20 @@ export function format(src: string, indentation: number = 4, useSpaces: boolean 
             console.error('IF YOU SEE THIS THE PRETTY PRINTER NEEDS TO BE UPDATED')
         },
         visitText: function (text: Text, context: any) {
+            const value = getFromSource(text.sourceSpan);
             if (context.skipFormattingChildren) {
-                pretty.push(text.value);
+                pretty.push(value);
                 return;
             }
-            let shouldInline = context.inlineTextNode && text.value.trim().length < 40 &&
-                text.value.trim().length + pretty[pretty.length - 1].length < 140;
+            let shouldInline = context.inlineTextNode && value.trim().length < 40 &&
+                value.trim().length + pretty[pretty.length - 1].length < 140;
 
             context.textNodeInlined = shouldInline;
-            if (text.value.trim().length > 0) {
+            if (value.trim().length > 0) {
                 let prefix = shouldInline ? '' : '\n' + getIndent(indent);
-                pretty.push(prefix + text.value.trim());
+                pretty.push(prefix + value.trim());
             } else if (!shouldInline) {
-                pretty.push(text.value.replace('\n', '').replace(/ /g, '').replace(/\t/g, '').replace(/\n+/, '\n'));
+                pretty.push(value.replace('\n', '').replace(/ /g, '').replace(/\t/g, '').replace(/\n+/, '\n'));
             }
         }
     }
