@@ -1,23 +1,44 @@
-import { HtmlParser, I18NHtmlParser, Parser, Lexer, CompilerConfig, TemplateParser, DomElementSchemaRegistry, Visitor, Node, Attribute, Element, Expansion, Text, Comment, ExpansionCase, ParseSourceSpan } from '@angular/compiler'
+import { Attribute, Comment, Expansion, ExpansionCase, HtmlParser, I18NHtmlParser, Node, ParseSourceSpan, Text, Visitor, Element } from '@angular/compiler';
 
-function formatElementName(name: string) {
+/* 
+* if the elements has svg: prepended for example <svg:g
+* then leave it (dont remove 'svg:')
+* further info: https://teropa.info/blog/2016/12/12/graphics-in-angular-2.html
+*/
+function formatElementName(element: Element) {
+    const file = element.sourceSpan.start.file.content;
+    const line = element.sourceSpan.start.line;
+
+    const lineString = file.split('\n')[line];
+    let name = element.name
+    
+    if (lineString.includes('svg:')) {
+        return name.replace(/^:svg:/, 'svg:');
+    } 
+    
     return name.replace(/^:svg:/, '');
+}
+
+function formatElementAttribute(attributeName: string) {
+    /* 
+    * avoid turning this:
+    * xml:space="preserve"
+    * into
+    * :xml:space="preserve" -> the parser prepends ':'
+    */
+    return attributeName.replace(/^:/, "")
 }
 
 export function format(src: string, indentation: number = 4, useSpaces: boolean = true, closeTagSameLine: boolean = false): string {
     const rawHtmlParser = new HtmlParser();
     const htmlParser = new I18NHtmlParser(rawHtmlParser);
-    const expressionParser = new Parser(new Lexer());
-    const config = new CompilerConfig();
-    const parser = new TemplateParser(
-        config, expressionParser, new DomElementSchemaRegistry(), htmlParser, null!, []);
     const htmlResult = htmlParser.parse(src, '', true);
 
     let pretty: string[] = [];
     let indent = 0;
     let attrNewLines = false;
 
-    if(htmlResult.errors && htmlResult.errors.length > 0) {
+    if (htmlResult.errors && htmlResult.errors.length > 0) {
         return src;
     }
 
@@ -59,7 +80,7 @@ export function format(src: string, indentation: number = 4, useSpaces: boolean 
         }
     }
 
-    function getFromSource(parseLocation:ParseSourceSpan) {
+    function getFromSource(parseLocation: ParseSourceSpan) {
         return parseLocation.start.file.content.substring(parseLocation.start.offset, parseLocation.end.offset);
     }
 
@@ -68,7 +89,7 @@ export function format(src: string, indentation: number = 4, useSpaces: boolean 
             if (pretty.length > 0) {
                 pretty.push('\n');
             }
-            pretty.push(getIndent(indent) + '<' + formatElementName(element.name));
+            pretty.push(getIndent(indent) + '<' + formatElementName(element));
             attrNewLines = element.attrs.length > 1 && element.name != 'link';
             element.attrs.forEach(attr => {
                 attr.visit(visitor, {});
@@ -94,7 +115,7 @@ export function format(src: string, indentation: number = 4, useSpaces: boolean 
                 pretty.push('\n' + getIndent(indent));
             }
             if (!selfClosing.hasOwnProperty(element.name)) {
-                pretty.push(`</${formatElementName(element.name)}>`);
+                pretty.push(`</${formatElementName(element)}>`);
             }
         },
         visit: function (node: Node, context: any) {
@@ -102,7 +123,7 @@ export function format(src: string, indentation: number = 4, useSpaces: boolean 
         },
         visitAttribute: function (attribute: Attribute, context: any) {
             let prefix = attrNewLines ? '\n' + getIndent(indent + 1) : ' ';
-            pretty.push(prefix + attribute.name);
+            pretty.push(prefix + formatElementAttribute(attribute.name));
             if (attribute.value.length) {
                 const value = getFromSource(attribute.valueSpan);
                 pretty.push(`=${value.trim()}`);
