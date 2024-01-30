@@ -64,7 +64,11 @@ export function format(src: string, indentation: number = 4, useSpaces: boolean 
     }
 
     let visitor: Visitor = {
-        visitElement: function (element) {
+        visitElement: function (element, context: any) {
+            if (context.skipFormattingChildren) {
+                pretty.push(getFromSource(element.sourceSpan));
+                return;
+            }
             if (pretty.length > 0) {
                 pretty.push('\n');
             }
