@@ -66,7 +66,8 @@ export function format(src: string, indentation: number = 4, useSpaces: boolean 
     let visitor: Visitor = {
         visitElement: function (element, context: any) {
             if (context.skipFormattingChildren) {
-                pretty.push(getFromSource(element.sourceSpan));
+                // We specifically don't use `getFromSource` because that causes an issue where the content of the child elements gets omitted.
+                pretty.push(element.sourceSpan.start.file.content.substring(element.startSourceSpan.start.offset, element.endSourceSpan.end.offset));
                 return;
             }
             if (pretty.length > 0) {
